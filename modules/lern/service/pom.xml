@@ -300,6 +300,15 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
+        <!-- Viewer Service actors (viewer-service-impl is NOT included: it duplicates lms plumbing
+             FQCNs (controllers.BaseController, util.*, modules.*) and would clash with lms-service-impl.
+             The monolith binds viewer actors directly and hosts its own thin viewer controllers. -->
+        <dependency>
+            <groupId>org.sunbird</groupId>
+            <artifactId>viewer-actors</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
         <!-- Notification Service (artifactId: notification-service-impl, version: 1.0-SNAPSHOT) -->
         <dependency>
             <groupId>org.sunbird</groupId>
@@ -342,4 +351,51 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>azure</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-azure</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>aws</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-aws</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>gcp</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-gcp</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>oci</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-oci</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

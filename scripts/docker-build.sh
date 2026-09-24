@@ -17,7 +17,7 @@
 #   ./scripts/docker-build.sh --service notification --repo ghcr.io/myorg --push
 #
 # Options:
-#   -s, --service  Service name (required): lern, userorg, lms, notification
+#   -s, --service  Service name (required): lern, userorg, lms, notification, viewer
 #   -r, --repo     Docker registry/repository (optional, no push if omitted)
 #   -n, --name     Image name (default: service-service)
 #   -t, --tag      Image tag (default: latest)
@@ -45,6 +45,7 @@ declare -A SERVICE_CONFIG=(
   [userorg]="userorg-service|build/userorg/Dockerfile|modules/userorg/controller/target/userorg-service-1.0-SNAPSHOT-dist.zip"
   [lms]="lms-service|build/lms/Dockerfile|modules/lms/service/target/lms-service-1.0-SNAPSHOT-dist.zip"
   [notification]="notification-service|build/notification/Dockerfile|modules/notification/service/target/notification-service-1.0-SNAPSHOT-dist.zip"
+  [viewer]="viewer-service|build/viewer/Dockerfile|modules/viewer/service/target/viewer-service-1.0-SNAPSHOT-dist.zip"
 )
 
 # Help message
@@ -52,7 +53,7 @@ function show_help {
     echo "Usage: $0 --service <service> [options]"
     echo ""
     echo "Required:"
-    echo "  -s, --service    Service name: lern, userorg, lms, notification"
+    echo "  -s, --service    Service name: lern, userorg, lms, notification, viewer"
     echo ""
     echo "Options:"
     echo "  -r, --repo       Docker registry/repository (e.g., ghcr.io/myorg)"
@@ -95,7 +96,7 @@ fi
 # Validate service name
 if [ -z "${SERVICE_CONFIG[$SERVICE]}" ]; then
     echo "Error: Unknown service '$SERVICE'"
-    echo "Valid services: lern, userorg, lms, notification"
+    echo "Valid services: lern, userorg, lms, notification, viewer"
     exit 1
 fi
 

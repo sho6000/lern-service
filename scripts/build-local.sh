@@ -39,6 +39,7 @@ declare -A SERVICE_CONFIG=(
   [userorg]="userorg|modules/userorg/controller|userorg-service-1.0-SNAPSHOT-dist.zip"
   [lms]="lms|modules/lms/service|lms-service-1.0-SNAPSHOT-dist.zip"
   [notification]="notification|modules/notification/service|notification-service-1.0-SNAPSHOT-dist.zip"
+  [viewer]="viewer|modules/viewer/service|viewer-service-1.0-SNAPSHOT-dist.zip"
 )
 
 # Help message
@@ -46,7 +47,7 @@ function show_help {
     echo "Usage: $0 --service <service> [options]"
     echo ""
     echo "Required:"
-    echo "  -s, --service    Service name: lern, userorg, lms, notification"
+    echo "  -s, --service    Service name: lern, userorg, lms, notification, viewer"
     echo ""
     echo "Options:"
     echo "  -c, --csp        Cloud Storage Provider (default: azure)"
@@ -82,7 +83,7 @@ fi
 # Validate service name
 if [ -z "${SERVICE_CONFIG[$SERVICE]}" ]; then
     echo "Error: Unknown service '$SERVICE'"
-    echo "Valid services: lern, userorg, lms, notification"
+    echo "Valid services: lern, userorg, lms, notification, viewer"
     exit 1
 fi
 
@@ -117,7 +118,7 @@ fi
 
 echo ""
 echo "Step 2: Creating Play distribution for ${SERVICE} service..."
-(cd "$PLAY_MODULE_PATH" && mvn play2:dist)
+mvn play2:dist -pl ${PLAY_MODULE_PATH} -P ${MAVEN_PROFILE},${CSP}
 
 echo ""
 echo "========================================="

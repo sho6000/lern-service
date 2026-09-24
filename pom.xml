@@ -30,6 +30,7 @@
         <pekko.version>1.0.3</pekko.version>
         <jackson.version>2.18.6</jackson.version>
         <c3p0.version>0.12.0</c3p0.version>
+        <cloud-storage-sdk.version>2.0.2</cloud-storage-sdk.version>
         <mchange-commons-java.version>0.4.0</mchange-commons-java.version>
         <netty.version>4.1.118.Final</netty.version>
         <junit.version>4.13.1</junit.version>
@@ -98,12 +99,22 @@
             </modules>
         </profile>
 
+        <!-- Build viewer module only (future) -->
+        <profile>
+            <id>viewer</id>
+            <modules>
+                <module>modules/lms</module>
+                <module>modules/viewer</module>
+            </modules>
+        </profile>
+
         <!-- Build all services together (Lern Service mode) -->
         <profile>
             <id>lern</id>
             <modules>
                 <module>modules/userorg</module>
                 <module>modules/lms</module>
+                <module>modules/viewer</module>
                 <module>modules/notification</module>
                 <module>modules/lern/service</module>
                 <module>lern-jacoco-report</module>

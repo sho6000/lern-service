@@ -438,5 +438,52 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>azure</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-azure</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>aws</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-aws</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>gcp</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-gcp</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>oci</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sunbird</groupId>
+                    <artifactId>cloud-storage-sdk-oci</artifactId>
+                    <version>${cloud-storage-sdk.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
 

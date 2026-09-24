@@ -175,6 +175,11 @@ public class CloudStorageUtil {
       if (authType == StorageConfig.AuthType.ACCESS_KEY) {
         builder.storageSecret(storageSecret);
       }
+      // region for providers that need it (e.g. AWS S3 outside us-east-1); no-op when unset
+      String region = ProjectUtil.getConfigValue(JsonKey.CLOUD_STORAGE_REGION);
+      if (StringUtils.isNotBlank(region)) {
+        builder.region(region);
+      }
       StorageConfig storageConfig = builder.build();
       IStorageService storageService = StorageServiceFactory.getStorageService(storageConfig);
       storageServiceMap.put(compositeKey, storageService);

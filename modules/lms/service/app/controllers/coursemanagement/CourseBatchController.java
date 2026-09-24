@@ -98,7 +98,8 @@ public class CourseBatchController extends BaseController {
       if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
           && reqObj.getRequest().get(JsonKey.FILTERS) != null
           && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
-        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+        Map<String, Object> f = (Map) reqObj.getRequest().get(JsonKey.FILTERS);
+        f.put(JsonKey.OBJECT_TYPE, esObjectType);
       } else {
         Map<String, Object> filtermap = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();

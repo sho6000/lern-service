@@ -472,6 +472,7 @@ public final class JsonKey {
 
   public static final String CLOUD_FOLDER_CONTENT = "sunbird_cloud_content_folder";
   public static final String CLOUD_STORE_BASE_PATH = "cloud_storage_base_url";
+  public static final String CLOUD_STORAGE_REGION = "cloud_storage_region";
   public static final String CLOUD_STORAGE_CNAME_URL= "cloud_storage_cname_url";
   public static final String CLOUD_STORE_BASE_PATH_PLACEHOLDER = "cloud_store_base_path_placeholder";
   public static final String TTL = "ttl";

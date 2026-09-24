@@ -284,3 +284,16 @@ PATCH /v1/notification/template/action/update       @controllers.notification.No
 
 GET /v1/notification/template/:action            @controllers.notification.NotificationTemplateController.getAction(action: String, request: play.mvc.Http.Request)
 
+
+# --- Viewer Service APIs ---
+POST     /v1/view/start                     @controllers.viewer.ViewController.viewStart(request: play.mvc.Http.Request)
+POST     /v1/view/update                    @controllers.viewer.ViewController.viewUpdate(request: play.mvc.Http.Request)
+POST     /v1/view/end                       @controllers.viewer.ViewController.viewEnd(request: play.mvc.Http.Request)
+POST     /v1/view/read                      @controllers.viewer.ViewController.viewRead(request: play.mvc.Http.Request)
+POST     /v1/assessment/submit              @controllers.viewer.ViewController.assessmentSubmit(request: play.mvc.Http.Request)
+POST     /v1/assessment/read                @controllers.viewer.ViewController.assessmentRead(request: play.mvc.Http.Request)
+POST     /v1/view/agg                       @controllers.viewer.ViewAggregateController.agg(request: play.mvc.Http.Request)
+POST     /v1/summary/read                   @controllers.viewer.ViewSummaryController.summaryRead(request: play.mvc.Http.Request)
+GET      /v1/summary/list/:userId           @controllers.viewer.ViewSummaryController.summaryList(userId: String, request: play.mvc.Http.Request)
+GET      /v1/summary/download/:userId       @controllers.viewer.ViewSummaryController.summaryDownload(userId: String, request: play.mvc.Http.Request)
+DELETE   /v1/summary/delete/:userId         @controllers.viewer.ViewSummaryController.summaryDelete(userId: String, request: play.mvc.Http.Request)

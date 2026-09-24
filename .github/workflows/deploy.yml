@@ -50,6 +50,7 @@ jobs:
           echo "USERORG_ENABLE=${{ vars.USERORG_SERVICE_BUILD == 'true' }}" >> $GITHUB_ENV
           echo "LMS_ENABLE=${{ vars.LMS_SERVICE_BUILD == 'true' }}" >> $GITHUB_ENV
           echo "NOTIFICATION_ENABLE=${{ vars.NOTIFICATION_SERVICE_BUILD == 'true' }}" >> $GITHUB_ENV
+          echo "VIEWER_ENABLE=${{ vars.VIEWER_SERVICE_BUILD == 'true' }}" >> $GITHUB_ENV
 
           # Cloud Storage Provider (CSP) — lookup from repo settings, default to azure
           CSP="${{ vars.CLOUD_STORAGE_PROVIDER }}"
@@ -145,5 +146,25 @@ jobs:
           file: build/notification/Dockerfile
           push: true
           tags: ${{ env.ORG_BASE }}/lern-notification-service:${{ env.IMAGE_TAG }}
+          build-args: |
+            CSP=${{ env.CSP }}
+
+      # ----------------------------------------------------------------
+      # VIEWER SERVICE (standalone / distributed deployment)
+      # ----------------------------------------------------------------
+      - name: Build Viewer Service
+        if: env.VIEWER_ENABLE == 'true'
+        env:
+          CSP: ${{ env.CSP }}
+        run: ./scripts/build-local.sh --service viewer
+
+      - name: Push Viewer Service Docker
+        if: env.VIEWER_ENABLE == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: build/viewer/Dockerfile
+          push: true
+          tags: ${{ env.ORG_BASE }}/lern-viewer-service:${{ env.IMAGE_TAG }}
           build-args: |
             CSP=${{ env.CSP }}

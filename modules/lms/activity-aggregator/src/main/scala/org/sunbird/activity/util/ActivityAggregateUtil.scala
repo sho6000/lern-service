@@ -334,8 +334,8 @@ class ActivityAggregateUtil {
                                        ): (util.Map[String, AnyRef], util.Map[String, AnyRef]) = {
     val selectMap = new util.HashMap[String, AnyRef]() {{
       put("userid", userId)
-      put("courseid", courseId)
-      put("batchid", batchId)
+      put("collectionid", courseId)
+      put("contextid", batchId)
       put("contentid", content.contentId)
     }}
 

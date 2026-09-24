@@ -14,6 +14,7 @@ import org.sunbird.request.{Request, RequestContext}
 import org.sunbird.response.ResponseCode
 import org.sunbird.enrolments.BaseEnrolmentActor
 import org.sunbird.helper.ServiceFactory
+import org.sunbird.http.HttpClientUtil
 import org.sunbird.kafka.KafkaClient
 import org.sunbird.learner.util.Util
 
@@ -55,12 +56,68 @@ class ActivityAggregatorActor extends BaseEnrolmentActor {
     val contents = if (contentsRaw != null) contentsRaw.asInstanceOf[util.List[util.Map[String, AnyRef]]] else null
 
     try {
-      processActivityAggregates(userId, batchId, courseId, contents, requestContext)
+      if (isViewerEnabled) {
+        val token = Option(request.getContext.get(JsonKey.X_AUTH_TOKEN)).map(_.asInstanceOf[String]).orNull
+        delegateToViewer(userId, courseId, batchId, contents, token, requestContext)
+      } else {
+        processActivityAggregates(userId, batchId, courseId, contents, requestContext)
+      }
       sender().tell(successResponse(), self)
     } catch {
       case ex: Exception =>
         logger.error(requestContext, s"ActivityAggregatorActor failed for userId: $userId, courseId: $courseId", ex)
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR, ex.getMessage)
+    }
+  }
+
+  private def isViewerEnabled: Boolean =
+    java.lang.Boolean.parseBoolean(ProjectUtil.getConfigValue("viewer_enabled"))
+
+  private def viewerBaseUrl: String =
+    Option(ProjectUtil.getConfigValue("viewer_service_base_url")).filter(StringUtils.isNotBlank)
+      .getOrElse("http://viewer-service:9000")
+
+  private def isMonolith: Boolean = !"distributed".equalsIgnoreCase(ProjectUtil.getConfigValue("deployment_mode"))
+
+  // /v1/activity/agg adapter -> viewer: contents map to viewStart/viewEnd, none -> aggregate; transport monolith tell vs distributed HTTP
+  private def delegateToViewer(userId: String, courseId: String, batchId: String,
+                               contents: util.List[util.Map[String, AnyRef]], token: String,
+                               ctx: RequestContext): Unit = {
+    val headers = new util.HashMap[String, String]() {{
+      put("Content-Type", "application/json")
+      Option(token).filter(StringUtils.isNotBlank).foreach(t => put("x-authenticated-user-token", t))
+    }}
+    def dispatch(actorName: String, api: String, operation: String, body: util.Map[String, AnyRef]): Unit = {
+      if (isMonolith) {
+        val req = new Request(); req.setRequestContext(ctx); req.setOperation(operation); req.setRequest(body)
+        context.actorSelection("/user/" + actorName).tell(req, org.apache.pekko.actor.ActorRef.noSender)
+      } else {
+        val envelope = new util.HashMap[String, AnyRef]() {{ put(JsonKey.REQUEST, body) }}
+        HttpClientUtil.post(viewerBaseUrl + api, gson.toJson(envelope), headers, ctx)
+      }
+    }
+    if (contents != null && !contents.isEmpty) {
+      contents.asScala.foreach { c =>
+        val status = Option(c.get(JsonKey.STATUS)).map(_.asInstanceOf[Number].intValue()).getOrElse(0)
+        val (op, api) = if (status >= 2) ("viewEnd", "/v1/view/end") else ("viewStart", "/v1/view/start")
+        dispatch("view-consumption-actor", api, op, new util.HashMap[String, AnyRef]() {{
+          put("contentId", c.get(JsonKey.CONTENT_ID))
+          put("courseId", courseId)
+          put("batchId", batchId)
+          put(JsonKey.USER_ID, userId)
+          Option(c.get("progressdetails")).orElse(Option(c.get("progressDetails"))).foreach(pd => put("progressDetails", pd))
+          Option(c.get(JsonKey.PROGRESS)).foreach(p => put(JsonKey.PROGRESS, p))
+          Option(c.get(JsonKey.VIEW_COUNT)).foreach(v => put(JsonKey.VIEW_COUNT, v))
+          Option(c.get(JsonKey.LAST_ACCESS_TIME)).foreach(v => put(JsonKey.LAST_ACCESS_TIME, v))
+          Option(c.get(JsonKey.LAST_COMPLETED_TIME)).foreach(v => put(JsonKey.LAST_COMPLETED_TIME, v))
+        }})
+      }
+    } else {
+      dispatch("viewer-aggregator-actor", "/v1/view/agg", "aggregate", new util.HashMap[String, AnyRef]() {{
+        put("courseId", courseId)
+        put("batchId", batchId)
+        put(JsonKey.USER_ID, userId)
+      }})
     }
   }
 
@@ -383,11 +440,11 @@ class ActivityAggregatorActor extends BaseEnrolmentActor {
 
   private def getContentStatusFromDB(userId: String, courseId: String, batchId: String, requestContext: RequestContext): UserContentConsumption = {
     logger.info(requestContext, s"getContentStatusFromDB: Querying user_content_consumption for userId: $userId, courseId: $courseId, batchId: $batchId")
-    val response = cassandraOperation.getRecordsByProperties(consumptionDBInfo.getKeySpace, "user_content_consumption", 
+    val response = cassandraOperation.getRecordsByProperties(consumptionDBInfo.getKeySpace, "user_content_consumption",
       new util.HashMap[String, AnyRef]() {{
         put("userid", userId)
-        put("courseid", courseId)
-        put("batchid", batchId)
+        put("collectionid", courseId)
+        put("contextid", batchId)
       }}, requestContext)
     
     if (response != null && response.getResult != null) {

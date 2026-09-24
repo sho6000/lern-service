@@ -20,7 +20,7 @@ class CassandraService(optionalDao: Option[CassandraOperation] = None) {
 
   def getAssessment(aid: String, uid: String, cid: String, bid: String, contId: String, ctx: RequestContext): Option[ExistingAssessment] = {
     try {
-      val filters = buildFilters("attempt_id" -> aid, "user_id" -> uid, "course_id" -> cid, "batch_id" -> bid, "content_id" -> contId)
+      val filters = buildFilters("attempt_id" -> aid, "user_id" -> uid, "collection_id" -> cid, "context_id" -> bid, "content_id" -> contId)
       val fields = java.util.Arrays.asList("attempt_id", "content_id", "last_attempted_on", "created_on", "total_score", "total_max_score", "question")
       val records = fetchRecords(filters, fields, ctx)
       records.headOption.map(mapToExisting)
@@ -29,7 +29,7 @@ class CassandraService(optionalDao: Option[CassandraOperation] = None) {
 
   def getUserAssessments(uid: String, cid: String, bid: String, contId: String, ctx: RequestContext): List[ExistingAssessment] = {
     try {
-      val filters = buildFilters("user_id" -> uid, "course_id" -> cid, "batch_id" -> bid, "content_id" -> contId)
+      val filters = buildFilters("user_id" -> uid, "collection_id" -> cid, "context_id" -> bid, "content_id" -> contId)
       val fields = java.util.Arrays.asList("content_id", "attempt_id", "last_attempted_on", "total_max_score", "total_score", "question")
       fetchRecords(filters, fields, ctx).map(mapToExisting)
     } catch { case e: Throwable => logger.error(s"List failed for $uid", e); List.empty }
@@ -77,8 +77,8 @@ class CassandraService(optionalDao: Option[CassandraOperation] = None) {
     rec.putAll(Map(
       "attempt_id" -> res.attemptId, 
       "user_id" -> res.userId, 
-      "course_id" -> res.courseId, 
-      "batch_id" -> res.batchId, 
+      "collection_id" -> res.courseId,
+      "context_id" -> res.batchId,
       "content_id" -> res.contentId, 
       "total_score" -> res.totalScore.asInstanceOf[AnyRef], 
       "total_max_score" -> res.totalMaxScore.asInstanceOf[AnyRef], 
